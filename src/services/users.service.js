@@ -1,4 +1,5 @@
 import { UserRepository } from "../repositories/users.repository.js";
+import { USER_ROLES } from "../constants/index.js";
 
 export const UserService = {
   async getAllUsers() {
