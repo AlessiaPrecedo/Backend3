@@ -1,43 +1,26 @@
-import { MocksService } from "../services/mock.service.js";
+import { MocksService } from "../services/mocks.service.js";
 
-export const GetMocks = async (req, res) => {
+export const getMockBundle = (req, res) => {
   try {
-    const mocks = await MocksService.getMocks();
-    res.json(mocks);
+    res.json(MocksService.generateBundle(req.query.qty));
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-export const GetMockById = async (req, res) => {
-  try {
-    const mock = await MocksService.getMockById(req.params.id);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(error.status ?? 500).json({ message: error.message });
   }
 };
 
-export const CreateMock = async (req, res) => {
+export const getMocks = (req, res) => {
   try {
-    const newMock = await MocksService.createMock(req.body);
-    res.status(201).json(newMock);
+    res.json(MocksService.generate(req.params.type, req.query.qty));
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(error.status ?? 500).json({ message: error.message });
   }
 };
-export const UpdateMock = async (req, res) => {
+
+export const loadMockData = async (req, res) => {
   try {
-    const updatedMock = await MocksService.updateMock(req.params.id, req.body);
-    res.json(updatedMock);
+    const result = await MocksService.persistBundle(req.query.qty);
+    res.status(201).json(result);
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-export const DeleteMock = async (req, res) => {
-  try {
-    await MocksService.deleteMock(req.params.id);
-    res.status(200).json({ message: "Mock deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(error.status ?? 500).json({ message: error.message });
   }
 };

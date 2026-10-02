@@ -13,6 +13,12 @@ export const UserRepository = {
     const user = new User(userData);
     return await user.save();
   },
+  async createMany(users, options = {}) {
+    return User.insertMany(users, options);
+  },
+  async deleteManyByIds(ids) {
+    return User.deleteMany({ _id: { $in: ids } });
+  },
   async update(id, userData) {
     return await User.findByIdAndUpdate(id, userData);
   },

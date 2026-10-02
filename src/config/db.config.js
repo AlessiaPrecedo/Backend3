@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import config from "./env.config";
+import { config } from "./env.config.js";
 
 export const connectDB = async () => {
   try {
@@ -7,5 +7,6 @@ export const connectDB = async () => {
     console.log("Connected to MongoDB");
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
+    throw error;
   }
 };

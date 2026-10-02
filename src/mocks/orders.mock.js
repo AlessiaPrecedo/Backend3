@@ -1,6 +1,10 @@
 import { faker } from "@faker-js/faker";
 
-import { ORDER_STATUS, MOCKING_PARAMETERS } from "../constants/index.js";
+import {
+  ORDER_STATUS,
+  MOCKING_PARAMETERS,
+  DELIVERY_PRIORITY,
+} from "../constants/index.js";
 
 const mockeables_statuses = () => [
   ORDER_STATUS.CREATED,
@@ -11,7 +15,11 @@ const mockeables_statuses = () => [
   ORDER_STATUS.CANCELLED,
 ];
 
-const mockeables_priorities = () => ["low", "normal", "high"];
+const mockeables_priorities = () => [
+  DELIVERY_PRIORITY.LOW,
+  DELIVERY_PRIORITY.NORMAL,
+  DELIVERY_PRIORITY.HIGH,
+];
 
 const generateMockOrderItem = () => ({
   name: faker.commerce.productName(),
@@ -28,8 +36,8 @@ const generateMockOrderItem = () => ({
   }),
 });
 
-export const generateMockOrder = () => {
-  const status = faker.helpers.arrayElement(mockeables_statuses());
+export const generateMockOrder = ({ customer, delivery = null, status } = {}) => {
+  const orderStatus = status ?? faker.helpers.arrayElement(mockeables_statuses());
 
   const items = Array.from(
     {
@@ -44,7 +52,7 @@ export const generateMockOrder = () => {
   );
 
   const order = {
-    customer: faker.string.uuid(),
+    customer,
 
     items,
 
@@ -60,21 +68,21 @@ export const generateMockOrder = () => {
 
     declaredValue: Number(total.toFixed(2)),
 
-    status,
+    status: orderStatus,
 
     priority: faker.helpers.arrayElement(mockeables_priorities()),
 
-    delivery: status === ORDER_STATUS.CREATED ? null : faker.string.uuid(),
+    delivery,
   };
 
   return order;
 };
 
-export const generateMockOrders = (qty = MOCKING_PARAMETERS.DEFAULT) => {
+export const generateMockOrders = (qty = MOCKING_PARAMETERS.DEFAULT, options = []) => {
   const orders = [];
 
   for (let i = 0; i < qty; i++) {
-    orders.push(generateMockOrder());
+    orders.push(generateMockOrder(options[i]));
   }
 
   return orders;

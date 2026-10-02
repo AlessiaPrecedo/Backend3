@@ -1,128 +1,47 @@
 # ShipNow API
 
-API backend para la gestión de usuarios y productos de **ShipNow**, desarrollada con Node.js, Express y MongoDB.
+API de ShipNow desarrollada con Node.js, Express y MongoDB, organizada en capas de rutas, controladores, servicios, repositorios y modelos.
 
-El proyecto fue refactorizado utilizando una arquitectura de **3 capas: Controller, Service y Repository**, con el objetivo de separar responsabilidades y mejorar la mantenibilidad del código.
-
-## Tecnologías
+## Requisitos
 
 - Node.js
-- Express
 - MongoDB
-- Mongoose
-- Dotenv
-- Nodemon
 
-## Arquitectura
+## Configuración
 
-El proyecto utiliza una arquitectura por capas:
-
-```text
-Request
-   ↓
-Controller
-   ↓
-Service
-   ↓
-Repository
-   ↓
-MongoDB
-```
-
-### Controller
-
-Es la puerta de entrada HTTP. Se encarga de recibir `req` y `res`, llamar al Service correspondiente y devolver la respuesta HTTP.
-
-### Service
-
-Contiene la lógica de negocio de la aplicación.
-
-Por ejemplo:
-
-- Evitar crear usuarios con un email ya registrado.
-- Asignar un rol `CUSTOMER` cuando no se especifica uno.
-- Evitar crear productos con un nombre duplicado.
-
-### Repository
-
-Es la única capa que conoce Mongoose y MongoDB. Se encarga de realizar las operaciones de consulta, creación, actualización y eliminación de datos.
-
-Esta separación permite que el Service no dependa directamente de la base de datos y que el Controller no tenga lógica de persistencia.
-
-## Estructura del proyecto
-
-```text
-src/
-├── config/
-│   └── env.config.js
-├── constants/
-│   └── index.js
-├── controllers/
-├── models/
-├── repositories/
-├── routes/
-├── services/
-└── app.js
-```
-
-## Configuración del entorno
-
-Crear un archivo `.env` en la raíz del proyecto:
-
-```env
-PORT=8080
-MONGODB_URI=tu_mongodb_uri
-NODE_ENV=development
-```
-
-También se incluye un archivo `.env.example` con las variables necesarias.
-
-La configuración de entorno está centralizada en:
-
-```text
-src/config/env.config.js
-```
-
-El proyecto valida que estén definidas las variables `PORT`, `MONGODB_URI` y `NODE_ENV` antes de iniciar la aplicación.
-
-## Instalación
-
-Clonar el repositorio e instalar las dependencias:
+Instala las dependencias y crea un archivo `.env` a partir de `.env.example`:
 
 ```bash
-git clone https://github.com/AlessiaPrecedo/Backend3.git
-cd Backend3
 npm install
-```
-
-Crear el archivo `.env` con las variables necesarias.
-
-## Ejecutar el proyecto
-
-Modo desarrollo:
-
-```bash
 npm run dev
 ```
 
-El servidor se inicia en el puerto configurado en `PORT`.
+La aplicación conecta con MongoDB antes de abrir el servidor. Configura `MONGODB_URI` con una base disponible.
 
-## Constantes
+## Mocking
 
-Las constantes utilizadas por la aplicación se encuentran centralizadas en:
+El router de mocking está montado en `/api/mocks`. Los datos se generan usando Faker y constantes del proyecto. Las consultas `GET` solo devuelven datos y no escriben en MongoDB. `qty` admite enteros entre 1 y 50; si se omite, se usa el valor predeterminado 10.
 
-```text
-src/constants/index.js
+### Generar datos sin guardarlos
+
+```http
+GET /api/mocks/users?qty=2
+GET /api/mocks/drivers?qty=2
+GET /api/mocks/orders?qty=2
+GET /api/mocks/deliveries?qty=2
+GET /api/mocks?qty=2
 ```
 
-Se utilizan objetos `Object.freeze()` para evitar modificaciones accidentales de valores como roles de usuario y estados de productos.
+`users` genera exactamente `qty` clientes; `drivers` genera exactamente `qty` usuarios con rol de repartidor. `orders` genera exactamente `qty` pedidos. `deliveries` contiene las entregas de los pedidos no cancelados, así que su cantidad puede ser menor que `qty`. Los documentos se construyen con referencias Mongo válidas. La respuesta de `GET /api/mocks` incluye un conjunto enlazado con `users`, `drivers`, `orders` y `deliveries` para inspeccionar las relaciones juntas. Para esa carga agrupada, se crean al menos un repartidor y aproximadamente uno cada tres clientes.
 
-## Objetivo de la refactorización
+Los pedidos usan estados y prioridades permitidos por las constantes. Los pedidos cancelados no tienen entrega; las entregas pendientes aún no tienen repartidor asignado, y las demás apuntan a un usuario con rol `DRIVER`.
 
-La refactorización busca separar responsabilidades:
+### Insertar datos de prueba en MongoDB
 
-- El **Controller** administra HTTP.
-- El **Service** contiene las reglas de negocio.
-- El **Repository** administra el acceso a MongoDB.
+```http
+POST /api/mocks/load?qty=2
+```
 
-De esta manera, cada capa tiene una responsabilidad específica y el código resulta más modular, legible y fácil de mantener.
+El endpoint genera e inserta usuarios, pedidos y entregas relacionados, y responde `201` con las cantidades insertadas y los documentos creados. Cada llamada carga un lote nuevo. La cantidad máxima por llamada es 50. Si falla una inserción, el servicio intenta retirar los documentos del mismo lote.
+
+La carga se implementa en `MocksService`; el servicio coordina los generadores y repositorios, mientras que los repositorios acceden a los modelos Mongoose.

@@ -7,13 +7,13 @@ const mockeables_roles = [
   USER_ROLES.STORE,
 ];
 
-export const generateMockUser = () => {
+export const generateMockUser = (role) => {
   const firstName = faker.person.firstName();
   const lastName = faker.person.lastName();
   const email = faker.internet
     .email({ firstName, lastName })
     .toLocaleLowerCase();
-  const role = faker.helpers.arrayElement(mockeables_roles);
+  const userRole = role ?? faker.helpers.arrayElement(mockeables_roles);
   const defaultPassword = MOCKING_PARAMETERS.DEFAULT_PASSWORD;
 
   const user = {
@@ -21,16 +21,15 @@ export const generateMockUser = () => {
     lastName,
     email,
     password: defaultPassword,
-    role,
-    isAvailable: role === USER_ROLES.DRIVER,
+    role: userRole,
   };
   return user;
 };
-export const generateMockUsers = (qty) => {
+export const generateMockUsers = (qty, role) => {
   const usersData = [];
 
   for (let i = 0; i < qty; i++) {
-    usersData.push(generateMockUser());
+    usersData.push(generateMockUser(role));
   }
 
   return usersData;
