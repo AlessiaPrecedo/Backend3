@@ -1,4 +1,8 @@
 import { ProductRepository } from "../repositories/product.repository.js";
+import {
+  ProductAlreadyExistsError,
+  ProductNotFoundError,
+} from "../errors/app.error.js";
 
 export const ProductService = {
   async getProducts() {
@@ -6,7 +10,11 @@ export const ProductService = {
   },
 
   async getProductById(id) {
-    return await ProductRepository.findById(id);
+    const product = await ProductRepository.findById(id);
+    if (!product) {
+      throw new ProductNotFoundError();
+    }
+    return product;
   },
 
   async createProduct(productData) {
@@ -15,17 +23,25 @@ export const ProductService = {
     );
 
     if (existingProduct) {
-      throw new Error("A product with this name already exists.");
+      throw new ProductAlreadyExistsError();
     }
 
     return await ProductRepository.create(productData);
   },
 
   async updateProduct(id, productData) {
-    return await ProductRepository.update(id, productData);
+    const product = await ProductRepository.update(id, productData);
+    if (!product) {
+      throw new ProductNotFoundError();
+    }
+    return product;
   },
 
   async deleteProduct(id) {
-    return await ProductRepository.delete(id);
+    const product = await ProductRepository.delete(id);
+    if (!product) {
+      throw new ProductNotFoundError();
+    }
+    return product;
   },
 };

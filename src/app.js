@@ -4,12 +4,18 @@ import productRoutes from "./routes/product.router.js";
 import { config } from "./config/env.config.js";
 import { connectDB } from "./config/db.config.js";
 import mocksRouter from "./routes/mocks.router.js";
+import {
+  errorHandler,
+  notFoundHandler,
+} from "./middlewares/error.middleware.js";
 
 const app = express();
 app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/products", productRoutes);
 app.use("/api/mocks", mocksRouter);
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 connectDB().catch((error) => {
   console.error(

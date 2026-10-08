@@ -13,10 +13,27 @@ Instala las dependencias y crea un archivo `.env` a partir de `.env.example`:
 
 ```bash
 npm install
+npm test
 npm run dev
 ```
 
 La aplicación conecta con MongoDB antes de abrir el servidor. Configura `MONGODB_URI` con una base disponible.
+
+La suite incluye pruebas de generación de mocks que no requieren una conexión a MongoDB.
+
+## Manejo de errores
+
+Los errores de rutas, validación, dominio y persistencia pasan por el middleware global. La respuesta mantiene el formato:
+
+```json
+{
+  "status": "error",
+  "error": "INVALID_MOCK_AMOUNT",
+  "message": "quantity must be an integer between 1 and 50"
+}
+```
+
+Los detalles técnicos solo se incluyen en el entorno `development`. Las rutas y controllers no construyen respuestas de error por separado.
 
 ## Mocking
 
@@ -42,6 +59,6 @@ Los pedidos usan estados y prioridades permitidos por las constantes. Los pedido
 POST /api/mocks/load?qty=2
 ```
 
-El endpoint genera e inserta usuarios, pedidos y entregas relacionados, y responde `201` con las cantidades insertadas y los documentos creados. Cada llamada carga un lote nuevo. La cantidad máxima por llamada es 50. Si falla una inserción, el servicio intenta retirar los documentos del mismo lote.
+El endpoint genera e inserta usuarios, pedidos y entregas relacionados, y responde `201` con las cantidades insertadas y los documentos creados. Cada llamada carga un lote nuevo. `qty` debe ser un entero entre 1 y 50; una cantidad inválida devuelve `400`, una base no conectada devuelve `503` y los fallos de inserción devuelven un error uniforme de persistencia. Si falla una inserción, el servicio intenta retirar los documentos del mismo lote y conserva los errores de limpieza para diagnóstico en `development`.
 
 La carga se implementa en `MocksService`; el servicio coordina los generadores y repositorios, mientras que los repositorios acceden a los modelos Mongoose.

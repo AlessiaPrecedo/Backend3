@@ -11,7 +11,12 @@ import { generateMockDeliveries } from "../mocks/deliveries.mock.js";
 import { DeliveryRepository } from "../repositories/deliveries.repository.js";
 import { OrderRepository } from "../repositories/orders.repository.js";
 import { UserRepository } from "../repositories/users.repository.js";
-import { HttpError } from "../utils/errors.js";
+import {
+  DatabaseUnavailableError,
+  InvalidMockAmountError,
+  InvalidMockTypeError,
+  MockPersistenceError,
+} from "../errors/app.error.js";
 
 const resolveQuantity = (quantity = MOCKING_PARAMETERS.DEFAULT) => {
   const parsedQuantity = Number(quantity);
@@ -20,10 +25,7 @@ const resolveQuantity = (quantity = MOCKING_PARAMETERS.DEFAULT) => {
     parsedQuantity < 1 ||
     parsedQuantity > MOCKING_PARAMETERS.MAX
   ) {
-    throw new HttpError(
-      400,
-      `Quantity must be an integer between 1 and ${MOCKING_PARAMETERS.MAX}.`,
-    );
+    throw new InvalidMockAmountError(MOCKING_PARAMETERS.MAX);
   }
   return parsedQuantity;
 };
@@ -111,20 +113,18 @@ export const MocksService = {
       deliveries: (data) => data.deliveries,
     };
     if (!Object.hasOwn(selectors, type)) {
-      throw new HttpError(404, `Unsupported mock type: ${type}`);
+      throw new InvalidMockTypeError(type);
     }
     return selectors[type](createMockData(parsedQuantity));
   },
 
   async persistBundle(quantity) {
+    const parsedQuantity = resolveQuantity(quantity);
     if (mongoose.connection.readyState !== 1) {
-      throw new HttpError(
-        503,
-        "MongoDB is not connected. Check MONGODB_URI and database credentials.",
-      );
+      throw new DatabaseUnavailableError();
     }
 
-    const data = createMockData(resolveQuantity(quantity));
+    const data = createMockData(parsedQuantity);
     const users = [...data.users, ...data.drivers];
     const ids = {
       users: users.map(({ _id }) => _id),
@@ -139,12 +139,18 @@ export const MocksService = {
         await DeliveryRepository.createMany(data.deliveries);
       }
     } catch (error) {
-      await Promise.allSettled([
+      const cleanupResults = await Promise.allSettled([
         DeliveryRepository.deleteManyByIds(ids.deliveries),
         OrderRepository.deleteManyByIds(ids.orders),
         UserRepository.deleteManyByIds(ids.users),
       ]);
-      throw error;
+      const rollbackErrors = cleanupResults
+        .filter((result) => result.status === "rejected")
+        .map((result) => result.reason?.message || "rollback failed");
+      throw new MockPersistenceError({
+        cause: error.message,
+        rollbackErrors,
+      });
     }
 
     return {
