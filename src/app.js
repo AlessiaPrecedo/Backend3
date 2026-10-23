@@ -8,9 +8,22 @@ import {
   errorHandler,
   notFoundHandler,
 } from "./middlewares/error.middleware.js";
+import logger from "./utils/logger.js";
 
 const app = express();
 app.use(express.json());
+app.use((req, res, next) => {
+  const startedAt = Date.now();
+  res.on("finish", () => {
+    logger.http("HTTP request", {
+      method: req.method,
+      path: req.path,
+      statusCode: res.statusCode,
+      durationMs: Date.now() - startedAt,
+    });
+  });
+  next();
+});
 app.use("/users", userRoutes);
 app.use("/products", productRoutes);
 app.use("/api/mocks", mocksRouter);
@@ -18,12 +31,12 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 connectDB().catch((error) => {
-  console.error(
-    "MongoDB connection failed; database-backed endpoints are unavailable:",
-    error.message,
+  logger.error(
+    "MongoDB connection failed; database-backed endpoints are unavailable",
+    { error: error.message, stack: error.stack },
   );
 });
 
 app.listen(config.port, () => {
-  console.log(`Server is running on port ${config.port}`);
+  logger.info("Server is running", { port: config.port });
 });

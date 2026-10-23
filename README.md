@@ -21,6 +21,20 @@ La aplicación conecta con MongoDB antes de abrir el servidor. Configura `MONGOD
 
 La suite incluye pruebas de generación de mocks que no requieren una conexión a MongoDB.
 
+## Logging
+
+El logger centralizado está en `src/utils/logger.js` y se puede importar desde cualquier módulo. Usa Winston con los niveles `fatal`, `error`, `warning`, `http`, `info` y `debug`. `LOG_LEVEL` establece el nivel mínimo: por ejemplo, `debug` muestra todos los niveles y `info` omite `http` y `debug`.
+
+En desarrollo los mensajes se muestran en consola con formato legible y detalles de errores. En producción la consola usa JSON y el mismo umbral configurable. En ambos entornos se guardan registros rotativos en `logs/application-AAAA-MM-DD.log`; los errores y fallas críticas también se escriben en `logs/error-AAAA-MM-DD.log`. Los archivos rotan diariamente o al superar 20 MB, se comprimen y se conservan por 14 días (aplicación) o 30 días (errores). La carpeta `logs/` está excluida de Git.
+
+Se registran solicitudes HTTP, el inicio del servidor, la conexión a MongoDB, errores globales y la persistencia de mocks. Para generar un registro de cada nivel:
+
+```http
+GET /api/mocks/logs-test
+```
+
+La respuesta confirma la prueba; consulta los archivos de `logs/` para verificar los registros. Configura `NODE_ENV` y `LOG_LEVEL` en `.env` (`development` y `debug` para desarrollo; `production` e `info` como valores recomendados para producción).
+
 ## Manejo de errores
 
 Los errores de rutas, validación, dominio y persistencia pasan por el middleware global. La respuesta mantiene el formato:

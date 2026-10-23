@@ -4,6 +4,7 @@ import {
   UserAlreadyExistsError,
   UserNotFoundError,
 } from "../errors/app.error.js";
+import logger from "../utils/logger.js";
 
 export const UserService = {
   async getAllUsers() {
@@ -26,13 +27,19 @@ export const UserService = {
     if (!userData.role) {
       userData.role = USER_ROLES.CUSTOMER;
     }
-    return await UserRepository.create(userData);
+    const user = await UserRepository.create(userData);
+    logger.info("User created", {
+      userId: user._id.toString(),
+      role: user.role,
+    });
+    return user;
   },
   async updateUser(id, userData) {
     const user = await UserRepository.update(id, userData);
     if (!user) {
       throw new UserNotFoundError();
     }
+    logger.info("User updated", { userId: user._id.toString() });
     return user;
   },
   async deleteUser(id) {
@@ -40,6 +47,7 @@ export const UserService = {
     if (!user) {
       throw new UserNotFoundError();
     }
+    logger.info("User deleted", { userId: user._id.toString() });
     return user;
   },
 };

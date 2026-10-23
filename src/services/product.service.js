@@ -3,6 +3,7 @@ import {
   ProductAlreadyExistsError,
   ProductNotFoundError,
 } from "../errors/app.error.js";
+import logger from "../utils/logger.js";
 
 export const ProductService = {
   async getProducts() {
@@ -26,7 +27,9 @@ export const ProductService = {
       throw new ProductAlreadyExistsError();
     }
 
-    return await ProductRepository.create(productData);
+    const product = await ProductRepository.create(productData);
+    logger.info("Product created", { productId: product._id.toString() });
+    return product;
   },
 
   async updateProduct(id, productData) {
@@ -34,6 +37,7 @@ export const ProductService = {
     if (!product) {
       throw new ProductNotFoundError();
     }
+    logger.info("Product updated", { productId: product._id.toString() });
     return product;
   },
 
@@ -42,6 +46,7 @@ export const ProductService = {
     if (!product) {
       throw new ProductNotFoundError();
     }
+    logger.info("Product deleted", { productId: product._id.toString() });
     return product;
   },
 };

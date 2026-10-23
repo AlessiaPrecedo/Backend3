@@ -17,6 +17,7 @@ import {
   InvalidMockTypeError,
   MockPersistenceError,
 } from "../errors/app.error.js";
+import logger from "../utils/logger.js";
 
 const resolveQuantity = (quantity = MOCKING_PARAMETERS.DEFAULT) => {
   const parsedQuantity = Number(quantity);
@@ -147,11 +148,27 @@ export const MocksService = {
       const rollbackErrors = cleanupResults
         .filter((result) => result.status === "rejected")
         .map((result) => result.reason?.message || "rollback failed");
+      logger.error("Mock data persistence failed", {
+        error: error.message,
+        rollbackErrors,
+      });
+      if (rollbackErrors.length) {
+        logger.warning("Mock data rollback was incomplete", { rollbackErrors });
+      }
       throw new MockPersistenceError({
         cause: error.message,
         rollbackErrors,
       });
     }
+
+    logger.info("Mock data persisted", {
+      counts: {
+        users: data.users.length,
+        drivers: data.drivers.length,
+        orders: data.orders.length,
+        deliveries: data.deliveries.length,
+      },
+    });
 
     return {
       counts: {
