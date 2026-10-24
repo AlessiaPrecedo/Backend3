@@ -31,12 +31,23 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 connectDB().catch((error) => {
-  logger.error(
+  logger.fatal(
     "MongoDB connection failed; database-backed endpoints are unavailable",
-    { error: error.message, stack: error.stack },
+    { error: error.message, stack: error.stack, port: config.port },
   );
 });
 
-app.listen(config.port, () => {
-  logger.info("Server is running", { port: config.port });
+const server = app.listen(config.port, () => {
+  logger.info("Server started successfully", {
+    port: config.port,
+    nodeEnv: config.nodeEnv,
+  });
+});
+
+server.on("error", (error) => {
+  logger.fatal("Server startup failed", {
+    error: error.message,
+    stack: error.stack,
+    port: config.port,
+  });
 });

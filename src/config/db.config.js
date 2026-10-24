@@ -5,11 +5,15 @@ import logger from "../utils/logger.js";
 export const connectDB = async () => {
   try {
     await mongoose.connect(config.mongoUrl);
-    logger.info("Connected to MongoDB");
+    logger.info("MongoDB connected successfully", {
+      mongoUrl: config.mongoUrl,
+      nodeEnv: config.nodeEnv,
+    });
   } catch (error) {
-    logger.error("Error connecting to MongoDB", {
+    logger.fatal("MongoDB connection failed", {
       error: error.message,
       stack: error.stack,
+      mongoUrl: config.mongoUrl,
     });
     throw error;
   }

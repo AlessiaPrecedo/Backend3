@@ -26,6 +26,11 @@ const resolveQuantity = (quantity = MOCKING_PARAMETERS.DEFAULT) => {
     parsedQuantity < 1 ||
     parsedQuantity > MOCKING_PARAMETERS.MAX
   ) {
+    logger.warning("Invalid mock quantity received", {
+      quantity,
+      minimum: 1,
+      maximum: MOCKING_PARAMETERS.MAX,
+    });
     throw new InvalidMockAmountError(MOCKING_PARAMETERS.MAX);
   }
   return parsedQuantity;
@@ -99,13 +104,28 @@ const createMockData = (
 
 export const MocksService = {
   generateBundle(quantity) {
-    return createMockData(resolveQuantity(quantity));
+    const resolvedQuantity = resolveQuantity(quantity);
+    const data = createMockData(resolvedQuantity);
+    logger.info("Mock bundle generated", {
+      quantity: resolvedQuantity,
+      users: data.users.length,
+      drivers: data.drivers.length,
+      orders: data.orders.length,
+      deliveries: data.deliveries.length,
+    });
+    return data;
   },
 
   generate(type, quantity) {
     const parsedQuantity = resolveQuantity(quantity);
     if (type === "drivers") {
-      return createMockData(parsedQuantity, parsedQuantity).drivers;
+      const drivers = createMockData(parsedQuantity, parsedQuantity).drivers;
+      logger.info("Mock drivers generated", {
+        type,
+        quantity: parsedQuantity,
+        count: drivers.length,
+      });
+      return drivers;
     }
 
     const selectors = {
@@ -114,9 +134,17 @@ export const MocksService = {
       deliveries: (data) => data.deliveries,
     };
     if (!Object.hasOwn(selectors, type)) {
+      logger.warning("Unsupported mock type requested", { type, quantity: parsedQuantity });
       throw new InvalidMockTypeError(type);
     }
-    return selectors[type](createMockData(parsedQuantity));
+
+    const generated = selectors[type](createMockData(parsedQuantity));
+    logger.info("Mock data generated", {
+      type,
+      quantity: parsedQuantity,
+      count: generated.length,
+    });
+    return generated;
   },
 
   async persistBundle(quantity) {

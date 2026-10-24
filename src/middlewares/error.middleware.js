@@ -5,7 +5,13 @@ import { ErrorsDictionary } from "../errors/error.dictionary.js";
 import logger from "../utils/logger.js";
 
 export const notFoundHandler = (req, res, next) => {
-  next(new AppError(ERROR_CODES.ROUTE_NOT_FOUND));
+  const routeError = new AppError(ERROR_CODES.ROUTE_NOT_FOUND);
+  logger.warning("Route not found", {
+    method: req.method,
+    path: req.originalUrl,
+    error: routeError.code,
+  });
+  next(routeError);
 };
 
 export const errorHandler = (err, req, res, next) => {
@@ -38,11 +44,14 @@ export const errorHandler = (err, req, res, next) => {
   };
 
   const logLevel =
-    definition.statusCode >= 500
+    err instanceof AppError && definition.statusCode >= 500
       ? "error"
-      : definition.statusCode >= 400
-        ? "warning"
-        : "info";
+      : definition.statusCode >= 500
+        ? "fatal"
+        : definition.statusCode >= 400
+          ? "warning"
+          : "info";
+
   logger[logLevel]("Request failed", {
     method: req.method,
     path: req.path,

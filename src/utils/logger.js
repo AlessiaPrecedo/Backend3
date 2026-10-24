@@ -70,11 +70,13 @@ const logger = winston.createLogger({
   ],
 });
 
-if (config.nodeEnv === "development") {
-  logger.add(
-    new winston.transports.Console({
-      level: config.logLevel,
-      format: winston.format.combine(
+const consoleFormat =
+  config.nodeEnv === "production"
+    ? winston.format.combine(
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+        winston.format.json(),
+      )
+    : winston.format.combine(
         winston.format.colorize(),
         winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
         winston.format.errors({ stack: true }),
@@ -84,19 +86,13 @@ if (config.nodeEnv === "development") {
             : "";
           return `${timestamp} ${level}: ${stack || message}${details}`;
         }),
-      ),
-    }),
-  );
-} else {
-  logger.add(
-    new winston.transports.Console({
-      level: config.logLevel,
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json(),
-      ),
-    }),
-  );
-}
+      );
+
+logger.add(
+  new winston.transports.Console({
+    level: config.nodeEnv === "production" ? "info" : config.logLevel,
+    format: consoleFormat,
+  }),
+);
 
 export default logger;
