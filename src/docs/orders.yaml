@@ -1,0 +1,4 @@
+tags:
+  - name: Orders
+    description: Módulo de pedidos del dominio. Actualmente no expone endpoints HTTP activos en la API.
+paths: {}

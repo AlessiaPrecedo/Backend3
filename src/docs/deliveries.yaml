@@ -1,0 +1,4 @@
+tags:
+  - name: Deliveries
+    description: Módulo de entregas del dominio. Actualmente no expone endpoints HTTP activos en la API.
+paths: {}

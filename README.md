@@ -21,6 +21,16 @@ La aplicación conecta con MongoDB antes de abrir el servidor. Configura `MONGOD
 
 La suite incluye pruebas de generación de mocks que no requieren una conexión a MongoDB.
 
+## Documentación Swagger
+
+La documentación interactiva de la API está disponible en:
+
+```http
+GET /api/docs
+```
+
+La configuración de Swagger está separada de la lógica de rutas y se encuentra en `src/docs/swagger.config.js`. La documentación incluye la información general de la API, tags por módulo (`Users`, `Products`, `Orders`, `Deliveries`, `Mocks`, `Logger`), schemas reutilizables y los errores documentados según el comportamiento real del backend.
+
 ## Logging
 
 El logger centralizado está en `src/utils/logger.js` y se puede importar desde cualquier módulo. Usa Winston con los niveles `fatal`, `error`, `warning`, `http`, `info` y `debug`. `LOG_LEVEL` establece el nivel mínimo: por ejemplo, `debug` muestra todos los niveles y `info` omite `http` y `debug`.

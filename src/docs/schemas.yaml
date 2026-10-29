@@ -1,0 +1,246 @@
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 64f9d5d1c5c9a123456789ab
+        firstName:
+          type: string
+          example: Ana
+        lastName:
+          type: string
+          example: García
+        email:
+          type: string
+          example: ana@example.com
+        password:
+          type: string
+          example: password123
+        role:
+          type: string
+          enum: [CUSTOMER, DRIVER]
+          example: CUSTOMER
+        documents:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: DNI
+              reference:
+                type: string
+                example: "12345678"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 64f9d5d1c5c9a123456789ac
+        name:
+          type: string
+          example: Mouse inalámbrico
+        description:
+          type: string
+          example: Mouse ergonómico con 3 botones
+        price:
+          type: number
+          example: 3500
+        stock:
+          type: integer
+          example: 20
+        status:
+          type: string
+          example: available
+        category:
+          type: string
+          example: Periféricos
+        image:
+          type: string
+          example: https://example.com/mouse.jpg
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    OrderItem:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Zapatillas
+        quantity:
+          type: integer
+          minimum: 1
+          example: 2
+        price:
+          type: number
+          example: 2400
+
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 64f9d5d1c5c9a123456789ad
+        customer:
+          type: string
+          example: 64f9d5d1c5c9a123456789ab
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        deliveryAddress:
+          type: string
+          example: Av. Corrientes 1234
+        total:
+          type: number
+          example: 4800
+        shippingCost:
+          type: number
+          example: 350
+        declaredValue:
+          type: number
+          example: 4800
+        status:
+          type: string
+          example: CREATED
+        priority:
+          type: string
+          example: NORMAL
+        delivery:
+          type: [string, 'null']
+          example: null
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Delivery:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 64f9d5d1c5c9a123456789ae
+        order:
+          type: string
+          example: 64f9d5d1c5c9a123456789ad
+        driver:
+          type: [string, 'null']
+          example: 64f9d5d1c5c9a123456789af
+        status:
+          type: string
+          example: PENDING
+        priority:
+          type: string
+          example: NORMAL
+        assignedAt:
+          type: [string, 'null']
+          format: date-time
+        deliveredAt:
+          type: [string, 'null']
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: string
+          example: INVALID_MOCK_AMOUNT
+        message:
+          type: string
+          example: quantity must be an integer between 1 and 50
+        details:
+          type: object
+          description: Solo se expone en entorno de desarrollo.
+
+    SuccessResponse:
+      type: object
+      description: Respuesta exitosa con el recurso solicitado o el resultado de la operación.
+      additionalProperties: true
+
+  responses:
+    ValidationError:
+      description: Los datos enviados no son válidos.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UserNotFound:
+      description: El usuario no existe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ProductNotFound:
+      description: El producto no existe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UserAlreadyExists:
+      description: El usuario ya existe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ProductAlreadyExists:
+      description: El producto ya existe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InvalidMockAmount:
+      description: La cantidad enviada es inválida para mocks.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InvalidMockType:
+      description: El tipo de mock solicitado no existe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    DatabaseUnavailable:
+      description: La base de datos no está conectada o no está disponible.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Error inesperado del servidor.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

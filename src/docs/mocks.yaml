@@ -1,0 +1,129 @@
+paths:
+  /api/mocks:
+    get:
+      tags: [Mocks]
+      summary: Generar bundle completo de mocks
+      description: Genera un conjunto enlazado de usuarios, drivers, pedidos y entregas con referencias válidas entre sí.
+      parameters:
+        - in: query
+          name: qty
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+          description: Cantidad de elementos a generar.
+      responses:
+        '200':
+          description: Bundle generado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  drivers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  deliveries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Delivery'
+        '400':
+          $ref: '#/components/responses/InvalidMockAmount'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/mocks/{type}:
+    get:
+      tags: [Mocks]
+      summary: Generar mocks por tipo
+      description: Genera una colección mock de tipo users, drivers, orders o deliveries.
+      parameters:
+        - in: path
+          name: type
+          required: true
+          schema:
+            type: string
+            enum: [users, drivers, orders, deliveries]
+          description: Tipo de dato mock a generar.
+        - in: query
+          name: qty
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+          description: Cantidad a generar.
+      responses:
+        '200':
+          description: Colección mock generada correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: '#/components/schemas/User'
+                    - $ref: '#/components/schemas/Order'
+                    - $ref: '#/components/schemas/Delivery'
+        '400':
+          $ref: '#/components/responses/InvalidMockAmount'
+        '404':
+          $ref: '#/components/responses/InvalidMockType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/mocks/load:
+    post:
+      tags: [Mocks]
+      summary: Insertar mocks persistidos en MongoDB
+      description: Genera usuarios, pedidos y entregas relacionados y los persiste en la base de datos configurada.
+      parameters:
+        - in: query
+          name: qty
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+          description: Cantidad de usuarios/pedidos a crear.
+      responses:
+        '201':
+          description: Datos de prueba insertados correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  counts:
+                    type: object
+                    properties:
+                      users:
+                        type: integer
+                      drivers:
+                        type: integer
+                      orders:
+                        type: integer
+                      deliveries:
+                        type: integer
+                  data:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/InvalidMockAmount'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/DatabaseUnavailable'

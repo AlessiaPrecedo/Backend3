@@ -1,0 +1,17 @@
+paths:
+  /api/mocks/logs-test:
+    get:
+      tags: [Logger]
+      summary: Probar todos los niveles del logger
+      description: Endpoint de diagnóstico para verificar la salida del logger en debug, http, info, warning, error y fatal. No es una funcionalidad de negocio.
+      responses:
+        '200':
+          description: Prueba ejecutada correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: One entry was sent for each log level.

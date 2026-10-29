@@ -1,6 +1,8 @@
 import express from "express";
+import swaggerUi from "swagger-ui-express";
 import userRoutes from "./routes/users.router.js";
 import productRoutes from "./routes/product.router.js";
+import { swaggerSpec } from "./docs/swagger.config.js";
 import { config } from "./config/env.config.js";
 import { connectDB } from "./config/db.config.js";
 import mocksRouter from "./routes/mocks.router.js";
@@ -12,7 +14,11 @@ import logger from "./utils/logger.js";
 
 const app = express();
 app.use(express.json());
+
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 app.use((req, res, next) => {
+  //En esta función se registra la información de cada solicitud HTTP que llega al servidor, incluyendo el método, la ruta, el código de estado y la duración de la solicitud en milisegundos. Esto es útil para monitorear el rendimiento y depurar problemas en la aplicación.
   const startedAt = Date.now();
   res.on("finish", () => {
     logger.http("HTTP request", {
