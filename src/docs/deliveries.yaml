@@ -1,4 +1,49 @@
 tags:
   - name: Deliveries
-    description: Módulo de entregas del dominio. Actualmente no expone endpoints HTTP activos en la API.
-paths: {}
+    description: Módulo de entregas del dominio.
+
+paths:
+  /deliveries:
+    get:
+      tags: [Deliveries]
+      summary: Listar entregas
+      description: Devuelve todas las entregas registradas.
+      responses:
+        '200':
+          description: Entregas encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Delivery'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /deliveries/{id}:
+    get:
+      tags: [Deliveries]
+      summary: Obtener entrega por id
+      description: Devuelve una entrega según su identificador.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Identificador de la entrega.
+      responses:
+        '200':
+          description: Entrega encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+        '404':
+          description: Entrega no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'

@@ -2,6 +2,8 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 import userRoutes from "./routes/users.router.js";
 import productRoutes from "./routes/product.router.js";
+import orderRoutes from "./routes/orders.router.js";
+import deliveryRoutes from "./routes/deliveries.router.js";
 import { swaggerSpec } from "./docs/swagger.config.js";
 import { config } from "./config/env.config.js";
 import { connectDB } from "./config/db.config.js";
@@ -32,6 +34,8 @@ app.use((req, res, next) => {
 });
 app.use("/users", userRoutes);
 app.use("/products", productRoutes);
+app.use("/orders", orderRoutes);
+app.use("/deliveries", deliveryRoutes);
 app.use("/api/mocks", mocksRouter);
 app.use(notFoundHandler);
 app.use(errorHandler);

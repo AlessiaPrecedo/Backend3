@@ -1,0 +1,149 @@
+tags:
+  - name: Products
+    description: Gestión de productos y stock.
+
+paths:
+  /products:
+    get:
+      tags: [Products]
+      summary: Listar productos
+      description: Devuelve la colección completa de productos registrados.
+      responses:
+        '200':
+          description: Productos encontrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Products]
+      summary: Crear producto
+      description: Crea un nuevo producto con la información enviada en el payload.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, description, price, stock, category]
+              properties:
+                name:
+                  type: string
+                  example: Mouse inalámbrico
+                description:
+                  type: string
+                  example: Mouse ergonómico con 3 botones
+                price:
+                  type: number
+                  example: 3500
+                stock:
+                  type: integer
+                  example: 20
+                status:
+                  type: string
+                  example: available
+                category:
+                  type: string
+                  example: Periféricos
+                image:
+                  type: string
+                  example: https://example.com/mouse.jpg
+      responses:
+        '201':
+          description: Producto creado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '409':
+          $ref: '#/components/responses/ProductAlreadyExists'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /products/{id}:
+    get:
+      tags: [Products]
+      summary: Obtener producto por id
+      description: Devuelve un producto según su identificador único.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Identificador del producto.
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          $ref: '#/components/responses/ProductNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags: [Products]
+      summary: Actualizar producto
+      description: Modifica los campos del producto indicado.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Identificador del producto.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          $ref: '#/components/responses/ProductNotFound'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: [Products]
+      summary: Eliminar producto
+      description: Elimina un producto según su identificador único.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Identificador del producto.
+      responses:
+        '200':
+          description: Producto eliminado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product deleted successfully
+        '404':
+          $ref: '#/components/responses/ProductNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'

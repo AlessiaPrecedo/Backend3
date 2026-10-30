@@ -18,8 +18,8 @@ const swaggerDefinition = {
   tags: [
     { name: "Users", description: "Gestión de usuarios" },
     { name: "Products", description: "Gestión de productos" },
-    { name: "Orders", description: "Pedidos del dominio. Actualmente no exponen endpoints HTTP activos." },
-    { name: "Deliveries", description: "Entregas del dominio. Actualmente no exponen endpoints HTTP activos." },
+    { name: "Orders", description: "Pedidos del dominio" },
+    { name: "Deliveries", description: "Entregas del dominio" },
     { name: "Mocks", description: "Generación y carga de datos mock para pruebas" },
     { name: "Logger", description: "Validación del sistema de logging" },
   ],
