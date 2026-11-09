@@ -20,6 +20,50 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+    post:
+      tags: [Orders]
+      summary: Crear pedido
+      description: Crea un pedido con el cliente, los artículos y la dirección de entrega enviados.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customer, items, deliveryAddress]
+              properties:
+                customer:
+                  type: string
+                  description: Identificador MongoDB de un usuario.
+                items:
+                  type: array
+                  minItems: 1
+                  items:
+                    $ref: '#/components/schemas/OrderItem'
+                deliveryAddress:
+                  type: string
+                  example: Av. Corrientes 1234
+                total:
+                  type: number
+                shippingCost:
+                  type: number
+                declaredValue:
+                  type: number
+                priority:
+                  type: string
+                  enum: [low, normal, high]
+      responses:
+        '201':
+          description: Pedido creado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /orders/{id}:
     get:
       tags: [Orders]

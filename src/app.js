@@ -5,8 +5,6 @@ import productRoutes from "./routes/product.router.js";
 import orderRoutes from "./routes/orders.router.js";
 import deliveryRoutes from "./routes/deliveries.router.js";
 import { swaggerSpec } from "./docs/swagger.config.js";
-import { config } from "./config/env.config.js";
-import { connectDB } from "./config/db.config.js";
 import mocksRouter from "./routes/mocks.router.js";
 import {
   errorHandler,
@@ -40,24 +38,4 @@ app.use("/api/mocks", mocksRouter);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-connectDB().catch((error) => {
-  logger.fatal(
-    "MongoDB connection failed; database-backed endpoints are unavailable",
-    { error: error.message, stack: error.stack, port: config.port },
-  );
-});
-
-const server = app.listen(config.port, () => {
-  logger.info("Server started successfully", {
-    port: config.port,
-    nodeEnv: config.nodeEnv,
-  });
-});
-
-server.on("error", (error) => {
-  logger.fatal("Server startup failed", {
-    error: error.message,
-    stack: error.stack,
-    port: config.port,
-  });
-});
+export default app;

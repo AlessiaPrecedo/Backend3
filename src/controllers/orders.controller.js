@@ -7,12 +7,10 @@ export const getAllOrders = async (req, res) => {
 
 export const getOrderById = async (req, res) => {
   const order = await OrderService.getOrderById(req.params.id);
-  if (!order) {
-    return res.status(404).json({
-      status: "error",
-      error: "ORDER_NOT_FOUND",
-      message: "Order not found",
-    });
-  }
   return res.json(order);
+};
+
+export const createOrder = async (req, res) => {
+  const newOrder = await OrderService.createOrder(req.body);
+  res.status(201).json(newOrder);
 };

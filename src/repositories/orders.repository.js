@@ -7,6 +7,10 @@ export const OrderRepository = {
   async findById(id) {
     return await Order.findById(id);
   },
+  async create(orderData) {
+    const order = new Order(orderData);
+    return await order.save();
+  },
   async createMany(orders, options = {}) {
     return Order.insertMany(orders, options);
   },

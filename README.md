@@ -1,6 +1,6 @@
 # ShipNow API
 
-API de ShipNow desarrollada con Node.js, Express y MongoDB, organizada en capas de rutas, controladores, servicios, repositorios y modelos.
+API de ShipNow desarrollada con Node.js, Express y MongoDB, organizada en capas de rutas, controladores, servicios, repositorios y modelos. `src/app.js` configura y exporta la aplicación Express; `src/server.js` conecta la base de datos e inicia el servidor.
 
 ## Requisitos
 
@@ -19,7 +19,17 @@ npm run dev
 
 La aplicación conecta con MongoDB antes de abrir el servidor. Configura `MONGODB_URI` con una base disponible.
 
-La suite incluye pruebas de generación de mocks que no requieren una conexión a MongoDB.
+## Testing
+
+La suite funcional usa **Mocha** para ejecutar y organizar los tests, **Chai** para las aserciones y **Supertest** para enviar peticiones a Express sin abrir un puerto. Ejecútala con:
+
+```bash
+npm test
+```
+
+Antes, copia `.env.test.example` a `.env.test` y configura una instancia de MongoDB descartable. Se requieren `PORT`, `MONGODB_URI`, `MONGODB_DB_NAME` y `NODE_ENV=test`; `LOG_LEVEL` y `JWT_SECRET` también están definidos en el ejemplo para mantener el entorno de pruebas autocontenido. Las pruebas cargan `.env.test` antes que los demás módulos y `MONGODB_DB_NAME` debe terminar en `_test` o `-test` (por ejemplo, `shipnow_test`). La suite limpia las colecciones de usuarios, pedidos y entregas antes de cada prueba; no uses una base con datos importantes. `.env.test` está excluido de Git.
+
+Los tests funcionales cubren listados, creación y consulta de usuarios y pedidos, errores de validación y recursos inexistentes, generación de mocks y cantidades inválidas, logger, Swagger y rutas inexistentes. La API aún no ofrece una operación para actualizar estados, por lo que ese caso no aplica. También se ejecutan pruebas unitarias del servicio de mocks y del logger.
 
 ## Documentación Swagger
 
